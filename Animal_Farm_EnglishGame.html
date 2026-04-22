@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐄 Animal Farm English Adventure</title>
+<style>
+  :root {
+    --green: #2d6a4f;
+    --light-green: #52b788;
+    --yellow: #f4a261;
+    --orange: #e76f51;
+    --cream: #fefae0;
+    --brown: #6d4c41;
+    --sky: #90e0ef;
+    --white: #ffffff;
+    --shadow: 0 4px 15px rgba(0,0,0,0.15);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #d8f3dc 0%, #b7e4c7 50%, #95d5b2 100%);
+    min-height: 100vh;
+    color: #333;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    background: linear-gradient(135deg, var(--green), #1b4332);
+    color: white;
+    text-align: center;
+    padding: 20px;
+    position: relative;
+    box-shadow: var(--shadow);
+  }
+  .header h1 { font-size: 2rem; letter-spacing: 1px; }
+  .header p { opacity: 0.85; margin-top: 5px; font-size: 1rem; }
+  .score-bar {
+    display: flex; justify-content: center; gap: 30px;
+    margin-top: 12px; flex-wrap: wrap;
+  }
+  .score-item {
+    background: rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 6px 18px;
+    font-weight: bold;
+    font-size: 0.95rem;
+  }
+
+  /* ===== MAIN MENU ===== */
+  #main-menu {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 40px 20px;
+  }
+  .menu-title { font-size: 1.4rem; color: var(--green); font-weight: bold; margin-bottom: 25px; }
+  .menu-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px; max-width: 900px; width: 100%;
+  }
+  .menu-card {
+    background: white;
+    border-radius: 20px;
+    padding: 25px 20px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 3px solid transparent;
+  }
+  .menu-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    border-color: var(--light-green);
+  }
+  .menu-card .icon { font-size: 2.8rem; margin-bottom: 10px; }
+  .menu-card h3 { color: var(--green); font-size: 1.1rem; margin-bottom: 6px; }
+  .menu-card p { color: #666; font-size: 0.85rem; }
+  .menu-card .badge {
+    display: inline-block;
+    background: var(--light-green);
+    color: white;
+    border-radius: 10px;
+    padding: 2px 10px;
+    font-size: 0.75rem;
+    margin-top: 8px;
+  }
+
+  /* ===== GAME SCREEN ===== */
+  .game-screen {
+    display: none;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  .game-screen.active { display: block; }
+
+  .game-header {
+    display: flex; align-items: center; gap: 15px;
+    background: white;
+    border-radius: 15px;
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .back-btn {
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+  }
+  .back-btn:hover { background: #1b4332; }
+  .game-title { font-size: 1.2rem; font-weight: bold; color: var(--green); flex: 1; }
+  .game-progress {
+    background: #eee;
+    border-radius: 20px;
+    height: 10px;
+    width: 150px;
+    overflow: hidden;
+  }
+  .game-progress-fill {
+    background: linear-gradient(90deg, var(--light-green), var(--green));
+    height: 100%;
+    border-radius: 20px;
+    transition: width 0.4s;
+  }
+
+  .question-card {
+    background: white;
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: var(--shadow);
+    margin-bottom: 18px;
+  }
+  .question-num { color: #999; font-size: 0.85rem; margin-bottom: 8px; }
+  .question-text { font-size: 1.15rem; font-weight: 600; color: #222; line-height: 1.5; }
+  .question-hint {
+    background: #fff8e1;
+    border-left: 4px solid var(--yellow);
+    border-radius: 5px;
+    padding: 10px 14px;
+    margin-top: 12px;
+    font-size: 0.9rem;
+    color: #555;
+  }
+
+  /* Options */
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 18px;
+  }
+  .option-btn {
+    background: #f8f9fa;
+    border: 2.5px solid #dee2e6;
+    border-radius: 14px;
+    padding: 14px 16px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    line-height: 1.4;
+  }
+  .option-btn:hover:not(:disabled) {
+    background: #e8f5e9;
+    border-color: var(--light-green);
+    transform: translateX(3px);
+  }
+  .option-btn.correct {
+    background: #d4edda; border-color: #28a745; color: #155724;
+  }
+  .option-btn.wrong {
+    background: #f8d7da; border-color: #dc3545; color: #721c24;
+  }
+  .option-btn:disabled { cursor: default; }
+
+  /* Feedback */
+  .feedback {
+    display: none;
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-top: 14px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct {
+    background: #d4edda; color: #155724;
+    border: 2px solid #28a745;
+  }
+  .feedback.wrong {
+    background: #f8d7da; color: #721c24;
+    border: 2px solid #dc3545;
+  }
+
+  .next-btn {
+    display: none;
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--light-green), var(--green));
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: opacity 0.2s;
+  }
+  .next-btn:hover { opacity: 0.9; }
+  .next-btn.show { display: block; }
+
+  /* ===== GAME 2 – FILL IN BLANK ===== */
+  .fill-input {
+    border: 2.5px solid #dee2e6;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 1rem;
+    width: 100%;
+    max-width: 320px;
+    margin-top: 14px;
+    transition: border-color 0.2s;
+  }
+  .fill-input:focus { outline: none; border-color: var(--light-green); }
+  .fill-input.correct { border-color: #28a745; background: #d4edda; }
+  .fill-input.wrong { border-color: #dc3545; background: #f8d7da; }
+  .check-btn {
+    padding: 10px 24px;
+    background: var(--yellow);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.2s;
+  }
+  .check-btn:hover { background: #e09000; }
+
+  /* ===== GAME 3 – DRAG & DROP FOOD CHAIN ===== */
+  .chain-area {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 16px 0;
+    min-height: 60px;
+    background: #f0fff4;
+    border: 2px dashed var(--light-green);
+    border-radius: 14px;
+    padding: 12px;
+    align-items: center;
+  }
+  .chain-item {
+    background: white;
+    border: 2px solid var(--light-green);
+    border-radius: 25px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    cursor: grab;
+    user-select: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: transform 0.15s;
+  }
+  .chain-item:hover { transform: scale(1.05); }
+  .chain-item.dragging { opacity: 0.4; }
+  .chain-slot {
+    min-width: 100px;
+    min-height: 44px;
+    background: rgba(255,255,255,0.7);
+    border: 2px dashed #aaa;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    color: #aaa;
+    padding: 8px 12px;
+  }
+  .chain-slot.filled {
+    border-color: var(--light-green);
+    background: white;
+    color: #333;
+    font-weight: 600;
+  }
+  .arrow-sep { font-size: 1.4rem; color: var(--green); }
+
+  /* ===== GAME 4 – MATH WORD PROBLEMS ===== */
+  .math-box {
+    background: linear-gradient(135deg, #fff8e1, #fff3cd);
+    border: 2px solid var(--yellow);
+    border-radius: 14px;
+    padding: 18px;
+    margin: 14px 0;
+    font-size: 0.95rem;
+    line-height: 1.8;
+  }
+  .math-box strong { color: var(--orange); }
+
+  /* ===== GAME 5 – SENTENCE BUILDER ===== */
+  .word-bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 14px 0;
+    padding: 14px;
+    background: #f0fff4;
+    border-radius: 14px;
+    border: 2px dashed var(--light-green);
+  }
+  .word-chip {
+    background: white;
+    border: 2px solid var(--light-green);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .word-chip:hover { background: var(--light-green); color: white; }
+  .word-chip.used { opacity: 0.3; pointer-events: none; }
+  .sentence-builder {
+    min-height: 50px;
+    background: white;
+    border: 2.5px solid #dee2e6;
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin: 10px 0;
+    font-size: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    cursor: pointer;
+  }
+  .sentence-builder:empty::before {
+    content: 'Click words below to build the sentence...';
+    color: #bbb;
+    font-style: italic;
+  }
+  .placed-word {
+    background: var(--light-green);
+    color: white;
+    border-radius: 15px;
+    padding: 4px 12px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .placed-word:hover { background: #e74c3c; }
+  .clear-btn {
+    padding: 7px 16px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  /* ===== RESULTS SCREEN ===== */
+  #results-screen {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+  }
+  #results-screen.active { display: block; }
+  .results-card {
+    background: white;
+    border-radius: 24px;
+    padding: 40px;
+    max-width: 500px;
+    margin: 0 auto;
+    box-shadow: var(--shadow);
+  }
+  .results-trophy { font-size: 5rem; margin-bottom: 15px; }
+  .results-title { font-size: 1.8rem; font-weight: bold; color: var(--green); }
+  .results-score {
+    font-size: 3rem;
+    font-weight: bold;
+    color: var(--orange);
+    margin: 15px 0;
+  }
+  .results-msg { color: #666; margin-bottom: 25px; font-size: 1.05rem; }
+  .results-btn {
+    padding: 12px 30px;
+    background: linear-gradient(135deg, var(--light-green), var(--green));
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 6px;
+    transition: opacity 0.2s;
+  }
+  .results-btn:hover { opacity: 0.9; }
+
+  /* Stars animation */
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  .star-animate { animation: bounce 0.6s ease infinite; }
+
+  /* Responsive */
+  @media(max-width: 600px) {
+    .options-grid { grid-template-columns: 1fr; }
+    .header h1 { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <h1>🐄 Animal Farm English Adventure</h1>
+  <p>Animal Management Department – Vocabulary & Grammar Practice</p>
+  <div class="score-bar">
+    <div class="score-item">⭐ Total Points: <span id="total-score">0</span></div>
+    <div class="score-item">🏆 Games Done: <span id="games-done">0</span>/5</div>
+  </div>
+</div>
+
+<!-- ===== MAIN MENU ===== -->
+<div id="main-menu">
+  <div class="menu-title">Choose a Mini-Game to Practice English! 🌿</div>
+  <div class="menu-grid">
+    <div class="menu-card" onclick="startGame('vocab')">
+      <div class="icon">🐔</div>
+      <h3>Vocabulary Quiz</h3>
+      <p>Match animal farming words to their meanings</p>
+      <span class="badge">Vocabulary</span>
+    </div>
+    <div class="menu-card" onclick="startGame('fill')">
+      <div class="icon">💊</div>
+      <h3>Fill in the Blank</h3>
+      <p>Complete sentences about animal health & business</p>
+      <span class="badge">Grammar</span>
+    </div>
+    <div class="menu-card" onclick="startGame('chain')">
+      <div class="icon">🌿</div>
+      <h3>Food Chain Order</h3>
+      <p>Arrange the food chain in the correct order</p>
+      <span class="badge">Science</span>
+    </div>
+    <div class="menu-card" onclick="startGame('math')">
+      <div class="icon">💰</div>
+      <h3>Farm Math Challenge</h3>
+      <p>Solve real-life profit & cost word problems</p>
+      <span class="badge">Math + Business</span>
+    </div>
+    <div class="menu-card" onclick="startGame('sentence')">
+      <div class="icon">📝</div>
+      <h3>Sentence Builder</h3>
+      <p>Build correct English sentences from word pieces</p>
+      <span class="badge">Grammar</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== GAME SCREENS ===== -->
+
+<!-- GAME 1: VOCABULARY QUIZ -->
+<div id="game-vocab" class="game-screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="goHome()">← Home</button>
+    <div class="game-title">🐔 Vocabulary Quiz</div>
+    <div>Q <span id="vocab-q-num">1</span>/10</div>
+    <div class="game-progress"><div class="game-progress-fill" id="vocab-progress" style="width:10%"></div></div>
+  </div>
+  <div class="question-card">
+    <div class="question-num" id="vocab-qnum">Question 1 of 10</div>
+    <div class="question-text" id="vocab-question"></div>
+    <div class="question-hint" id="vocab-hint"></div>
+    <div class="options-grid" id="vocab-options"></div>
+    <div class="feedback" id="vocab-feedback"></div>
+    <button class="next-btn" id="vocab-next" onclick="nextQuestion('vocab')">Next Question →</button>
+  </div>
+</div>
+
+<!-- GAME 2: FILL IN BLANK -->
+<div id="game-fill" class="game-screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="goHome()">← Home</button>
+    <div class="game-title">💊 Fill in the Blank</div>
+    <div>Q <span id="fill-q-num">1</span>/8</div>
+    <div class="game-progress"><div class="game-progress-fill" id="fill-progress" style="width:12.5%"></div></div>
+  </div>
+  <div class="question-card">
+    <div class="question-num" id="fill-qnum">Question 1 of 8</div>
+    <div class="question-text" id="fill-question"></div>
+    <div style="margin-top:14px">
+      <input class="fill-input" type="text" id="fill-input" placeholder="Type your answer here..." onkeydown="if(event.key==='Enter')checkFill()">
+      <br>
+      <button class="check-btn" onclick="checkFill()">✔ Check Answer</button>
+    </div>
+    <div class="feedback" id="fill-feedback"></div>
+    <button class="next-btn" id="fill-next" onclick="nextQuestion('fill')">Next Question →</button>
+  </div>
+</div>
+
+<!-- GAME 3: FOOD CHAIN -->
+<div id="game-chain" class="game-screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="goHome()">← Home</button>
+    <div class="game-title">🌿 Food Chain Order</div>
+    <div>Round <span id="chain-q-num">1</span>/5</div>
+    <div class="game-progress"><div class="game-progress-fill" id="chain-progress" style="width:20%"></div></div>
+  </div>
+  <div class="question-card">
+    <div class="question-num" id="chain-qnum">Round 1 of 5</div>
+    <div class="question-text" id="chain-question"></div>
+    <div id="chain-word-bank" class="word-bank"></div>
+    <div style="margin-top:12px; color:#555; font-size:0.9rem;">👆 Click items above in the correct order — they will appear below:</div>
+    <div id="chain-answer-area" class="sentence-builder" style="margin-top:8px" onclick="removeLastChainWord()"></div>
+    <div style="margin-top:8px">
+      <button class="check-btn" onclick="checkChain()">✔ Check Order</button>
+      <button class="clear-btn" style="margin-left:8px" onclick="clearChain()">✖ Clear</button>
+    </div>
+    <div class="feedback" id="chain-feedback"></div>
+    <button class="next-btn" id="chain-next" onclick="nextQuestion('chain')">Next Round →</button>
+  </div>
+</div>
+
+<!-- GAME 4: MATH WORD PROBLEMS -->
+<div id="game-math" class="game-screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="goHome()">← Home</button>
+    <div class="game-title">💰 Farm Math Challenge</div>
+    <div>Q <span id="math-q-num">1</span>/8</div>
+    <div class="game-progress"><div class="game-progress-fill" id="math-progress" style="width:12.5%"></div></div>
+  </div>
+  <div class="question-card">
+    <div class="question-num" id="math-qnum">Question 1 of 8</div>
+    <div class="math-box" id="math-story"></div>
+    <div class="question-text" id="math-question"></div>
+    <div class="options-grid" id="math-options"></div>
+    <div class="feedback" id="math-feedback"></div>
+    <button class="next-btn" id="math-next" onclick="nextQuestion('math')">Next Question →</button>
+  </div>
+</div>
+
+<!-- GAME 5: SENTENCE BUILDER -->
+<div id="game-sentence" class="game-screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="goHome()">← Home</button>
+    <div class="game-title">📝 Sentence Builder</div>
+    <div>Q <span id="sentence-q-num">1</span>/8</div>
+    <div class="game-progress"><div class="game-progress-fill" id="sentence-progress" style="width:12.5%"></div></div>
+  </div>
+  <div class="question-card">
+    <div class="question-num" id="sentence-qnum">Question 1 of 8</div>
+    <div class="question-text" id="sentence-question"></div>
+    <div class="question-hint" id="sentence-hint"></div>
+    <div id="sentence-word-bank" class="word-bank"></div>
+    <div style="color:#555; font-size:0.85rem; margin-top:4px">👆 Click words to build your sentence (click placed word to remove it)</div>
+    <div id="sentence-builder" class="sentence-builder"></div>
+    <div style="margin-top:8px">
+      <button class="check-btn" onclick="checkSentence()">✔ Check Sentence</button>
+      <button class="clear-btn" style="margin-left:8px" onclick="clearSentence()">✖ Clear</button>
+    </div>
+    <div class="feedback" id="sentence-feedback"></div>
+    <button class="next-btn" id="sentence-next" onclick="nextQuestion('sentence')">Next Question →</button>
+  </div>
+</div>
+
+<!-- ===== RESULTS ===== -->
+<div id="results-screen">
+  <div class="results-card">
+    <div class="results-trophy" id="results-trophy">🏆</div>
+    <div class="results-title" id="results-title">Game Complete!</div>
+    <div class="results-score" id="results-score">8/10</div>
+    <div class="results-msg" id="results-msg">Great job!</div>
+    <button class="results-btn" onclick="retryGame()">🔄 Play Again</button>
+    <button class="results-btn" onclick="goHome()">🏠 Main Menu</button>
+  </div>
+</div>
+
+<script>
+// =============================================
+// DATA
+// =============================================
+
+const VOCAB_QUESTIONS = [
+  {
+    q: "What does 'vaccination' mean in animal farming?",
+    hint: "💊 We do this to keep animals healthy and prevent illness.",
+    options: [
+      "Injecting a vaccine to prevent disease ✅",
+      "Feeding animals protein supplements",
+      "Cleaning the animal shelter",
+      "Calculating the feeding cost"
+    ],
+    correct: 0,
+    explain: "Correct! Vaccination = injection of a vaccine to prevent disease. Example: 'Vaccination is necessary for disease prevention.'"
+  },
+  {
+    q: "Which word means an animal that ONLY eats plants?",
+    hint: "🌿 Think about cows eating grass...",
+    options: [
+      "Carnivore",
+      "Omnivore",
+      "Herbivore ✅",
+      "Predator"
+    ],
+    correct: 2,
+    explain: "Correct! Herbivore = animal that eats only plants. Example: cows 🐄 are herbivores. Food chain: Plants → Herbivore → Carnivore."
+  },
+  {
+    q: "What is a 'food chain'?",
+    hint: "🌿 → 🐄 → 🧑 This shows who eats who.",
+    options: [
+      "A list of foods animals like",
+      "A supermarket supply network",
+      "The order of living things eating each other ✅",
+      "A schedule for feeding animals"
+    ],
+    correct: 2,
+    explain: "Correct! Food chain = the order in which living things consume each other. Plants → Animals → Humans is the basic food chain."
+  },
+  {
+    q: "What does 'balanced diet' mean for animals?",
+    hint: "🍗🥬 Animals need different types of food.",
+    options: [
+      "Eating only vegetables",
+      "Eating the right mix of protein, vitamins & nutrients ✅",
+      "Eating the same food every day",
+      "Not eating too much food"
+    ],
+    correct: 1,
+    explain: "Correct! A balanced diet = the right mix of food types. Example: 'A balanced diet helps animals grow well.'"
+  },
+  {
+    q: "What is 'animal welfare'?",
+    hint: "❤️ Treating animals in a kind and responsible way.",
+    options: [
+      "Selling animals at a good price",
+      "The profit from raising animals",
+      "Ensuring animals are healthy, safe and treated humanely ✅",
+      "A tax on animal products"
+    ],
+    correct: 2,
+    explain: "Correct! Animal welfare = ensuring animals are healthy and treated humanely. 'We raise animals in a humane and ethical way.'"
+  },
+  {
+    q: "Which animals are OMNIVORES? (eat both plants and meat)",
+    hint: "🐷🐔 These animals eat many different things.",
+    options: [
+      "Cows and sheep",
+      "Lions and tigers",
+      "Pigs and chickens ✅",
+      "Fish and shrimp"
+    ],
+    correct: 2,
+    explain: "Correct! Pigs 🐖 and chickens 🐔 are omnivores — they eat both plants and other food sources."
+  },
+  {
+    q: "What does 'disease prevention' mean?",
+    hint: "🦠 We do this BEFORE animals get sick.",
+    options: [
+      "Treating sick animals with medicine",
+      "Removing sick animals from the farm",
+      "Actions taken to stop diseases before they spread ✅",
+      "Selling animals before they get ill"
+    ],
+    correct: 2,
+    explain: "Correct! Disease prevention = actions to stop diseases before they happen. 'We prevent disease by regular cleaning and vaccination.'"
+  },
+  {
+    q: "What does 'protein' do for animals?",
+    hint: "💪 Think about what helps animals grow bigger.",
+    options: [
+      "Makes animals sleep better",
+      "Supports muscle growth and body development ✅",
+      "Helps animals see in the dark",
+      "Prevents animals from escaping"
+    ],
+    correct: 1,
+    explain: "Correct! Protein → for growth. Animals need protein to build muscles and grow. Example: chickens need protein in their daily feed."
+  },
+  {
+    q: "What is a 'feeding schedule'?",
+    hint: "📅 A plan for WHEN and HOW MUCH to feed animals.",
+    options: [
+      "A recipe for animal food",
+      "A list of animals on the farm",
+      "A planned timetable for giving food to animals ✅",
+      "The cost of buying animal feed"
+    ],
+    correct: 2,
+    explain: "Correct! A feeding schedule = a timetable showing when and how much to feed animals. This helps control costs and growth."
+  },
+  {
+    q: "Which sentence uses the PAST tense correctly?",
+    hint: "⏳ Something that already happened.",
+    options: [
+      "'We are vaccinating the animals.'",
+      "'We vaccinated the animals last month.' ✅",
+      "'We will vaccinate the animals tomorrow.'",
+      "'We vaccinate the animals every week.'"
+    ],
+    correct: 1,
+    explain: "Correct! 'Vaccinated' is past tense. The clue 'last month' tells us it already happened. Present: 'We vaccinate.' Past: 'We vaccinated.'"
+  }
+];
+
+const FILL_QUESTIONS = [
+  {
+    sentence: "Animals need protein for _____ and vitamins for immunity.",
+    answer: "growth",
+    hint: "💪 What does protein help animals do?",
+    explain: "Protein → for GROWTH. Vitamins → for immunity. These are the two key nutrients for animals."
+  },
+  {
+    sentence: "We raise animals in a clean and _____ environment.",
+    answer: "safe",
+    hint: "🏠 The opposite of 'dangerous'.",
+    explain: "'We raise animals in a clean and SAFE environment.' — a key sentence from the Animal Management Department!"
+  },
+  {
+    sentence: "Pigs and chickens are _____ because they eat both plants and meat.",
+    answer: "omnivores",
+    hint: "🐷🐔 Animals that eat many things.",
+    explain: "OMNIVORES eat both plants and animals. Herbivores = plants only. Carnivores = meat only."
+  },
+  {
+    sentence: "Profit = _____ minus Cost.",
+    answer: "revenue",
+    hint: "💰 The money you earn from selling products.",
+    explain: "The formula: Profit = REVENUE – Cost. Revenue = total money earned from sales."
+  },
+  {
+    sentence: "If animals are unhealthy, production will _____.",
+    answer: "decrease",
+    hint: "📉 The opposite of 'increase'.",
+    explain: "Conditional sentence: 'If animals are unhealthy, production will DECREASE.' This is a real-world cause-and-effect relationship."
+  },
+  {
+    sentence: "We use _____ to keep animals free from disease.",
+    answer: "vaccination",
+    hint: "💉 A medical injection given to prevent illness.",
+    explain: "VACCINATION prevents disease. 'We use vaccination to keep animals free from disease.'"
+  },
+  {
+    sentence: "Cows are _____ because they only eat grass and plants.",
+    answer: "herbivores",
+    hint: "🌿 Animals that only eat plants.",
+    explain: "HERBIVORES eat only plants. Cows 🐄 are classic herbivores. They are part of the food chain: Plants → Cows → Humans."
+  },
+  {
+    sentence: "A _____ diet helps animals grow well and stay healthy.",
+    answer: "balanced",
+    hint: "⚖️ Having the right mix of different foods.",
+    explain: "'A BALANCED diet helps animals grow well.' It means providing the right amounts of protein, vitamins, and nutrients."
+  }
+];
+
+const CHAIN_QUESTIONS = [
+  {
+    q: "Arrange the basic food chain from the Animal Management presentation in the correct order:",
+    items: ["Humans 🧑", "Animals 🐄", "Plants 🌿", "Sunlight ☀️"],
+    correct: ["Sunlight ☀️", "Plants 🌿", "Animals 🐄", "Humans 🧑"],
+    explain: "Sunlight → Plants produce energy → Animals transform that energy → Humans depend on both! This is the food chain from the opening speech."
+  },
+  {
+    q: "Order the chicken farming process from start to finish:",
+    items: ["Sell 💰", "Feed daily 🌽", "Buy chicks 🐣", "Grow (3-4 months) 📈"],
+    correct: ["Buy chicks 🐣", "Feed daily 🌽", "Grow (3-4 months) 📈", "Sell 💰"],
+    explain: "The chicken farming cycle: Buy chicks → Feed daily → Grow for 3-4 months → Sell for profit!"
+  },
+  {
+    q: "Order the steps of disease prevention for animals:",
+    items: ["Vaccinate 💉", "Regular cleaning 🧹", "Monitor health daily 👁️", "Clean shelter 🏠"],
+    correct: ["Clean shelter 🏠", "Regular cleaning 🧹", "Monitor health daily 👁️", "Vaccinate 💉"],
+    explain: "Good animal health starts with: Clean shelter → Regular cleaning → Monitor health → Vaccinate when needed."
+  },
+  {
+    q: "Arrange the profit calculation steps in order:",
+    items: ["Calculate profit 📊", "Count total revenue 💰", "Subtract cost 🧮", "Know your costs 📋"],
+    correct: ["Know your costs 📋", "Count total revenue 💰", "Subtract cost 🧮", "Calculate profit 📊"],
+    explain: "To find profit: Know costs (10M) → Count revenue (18M) → Subtract cost → Profit = 18M - 10M = 8M VND!"
+  },
+  {
+    q: "Order the animal husbandry department's responsibilities from first to last:",
+    items: ["Sell products 🛒", "Raise animals 🐄", "Feed and vaccinate 💊", "Monitor health 🔍"],
+    correct: ["Raise animals 🐄", "Feed and vaccinate 💊", "Monitor health 🔍", "Sell products 🛒"],
+    explain: "The cycle: Raise animals → Feed & vaccinate regularly → Monitor their health → Sell quality products!"
+  }
+];
+
+const MATH_QUESTIONS = [
+  {
+    story: "🐔 One chicken eats <strong>100 grams</strong> of food per day. Your farm has <strong>100 chickens</strong>.",
+    q: "How much food do 100 chickens eat in ONE day?",
+    options: ["100 kg", "10 kg ✅", "1 kg", "1,000 kg"],
+    correct: 1,
+    explain: "100 grams × 100 chickens = 10,000 grams = 10 kg per day. 'We use math to manage feeding!'"
+  },
+  {
+    story: "🐔 Your farm has 100 chickens that eat <strong>10 kg of food per day</strong>.",
+    q: "How much food is needed in 30 days?",
+    options: ["100 kg", "3,000 kg", "300 kg ✅", "30 kg"],
+    correct: 2,
+    explain: "10 kg × 30 days = 300 kg of food. 'This helps us control costs and planning.' — Animal Management Dept."
+  },
+  {
+    story: "💰 The Animal Department's costs: Feed = 5M VND, Vaccines = 2M VND, Labor = 3M VND.",
+    q: "What is the TOTAL COST?",
+    options: ["8M VND", "10M VND ✅", "12M VND", "15M VND"],
+    correct: 1,
+    explain: "5M + 2M + 3M = 10M VND total cost. Always add all expenses: feed + vaccines + labor!"
+  },
+  {
+    story: "📈 Revenue = <strong>18M VND</strong>. Total Cost = <strong>10M VND</strong>. Formula: Profit = Revenue – Cost.",
+    q: "What is the PROFIT?",
+    options: ["28M VND", "8M VND ✅", "18M VND", "10M VND"],
+    correct: 1,
+    explain: "Profit = 18M – 10M = 8M VND. 'The Animal Management Department earned 8 million VND profit!'"
+  },
+  {
+    story: "🌿 By using natural food from the farm, the department saves <strong>30%</strong> of feeding costs. Original feeding cost = <strong>10M VND</strong>.",
+    q: "How much money is SAVED?",
+    options: ["1M VND", "5M VND", "3M VND ✅", "7M VND"],
+    correct: 2,
+    explain: "30% of 10M = 3M VND saved. 'This increases profits.' If you save 3M, new cost = 7M VND."
+  },
+  {
+    story: "⏳ Selling time: Chickens take <strong>3-4 months</strong>, Pigs take <strong>5-6 months</strong>, Fish take <strong>4-6 months</strong>.",
+    q: "Which animal takes the SHORTEST time to sell?",
+    options: ["Fish 🐟", "Pigs 🐖", "Chickens 🐔 ✅", "All the same"],
+    correct: 2,
+    explain: "Chickens take only 3-4 months — the shortest! 'Selling at the right time = higher income.' Smart timing matters!"
+  },
+  {
+    story: "🏥 Original feeding cost: <strong>10M VND</strong>. After using farm-grown food, cost is reduced by <strong>30-40%</strong>.",
+    q: "What is the REDUCED cost after saving 40%?",
+    options: ["8M VND", "4M VND", "6M VND ✅", "7M VND"],
+    correct: 2,
+    explain: "40% of 10M = 4M saved. New cost = 10M – 4M = 6M VND. 'We save 30-40% of feeding costs!'"
+  },
+  {
+    story: "🐖 Pigs take <strong>5-6 months</strong> to be ready to sell. You start raising pigs in <strong>January</strong>.",
+    q: "What is the EARLIEST month you can sell the pigs?",
+    options: ["March", "April", "May", "June ✅"],
+    correct: 3,
+    explain: "January + 5 months = June. 'Selling at the right time = higher income.' Pigs: 5-6 months to grow."
+  }
+];
+
+const SENTENCE_QUESTIONS = [
+  {
+    q: "Translate and arrange: 'Chúng tôi nuôi động vật trong môi trường sạch và an toàn.'",
+    hint: "🏠 We / raise / animals / in / a / clean / and / safe / environment",
+    words: ["We", "raise", "animals", "in", "a", "clean", "and", "safe", "environment", "."],
+    correct: ["We", "raise", "animals", "in", "a", "clean", "and", "safe", "environment", "."],
+    explain: "✅ 'We raise animals in a clean and safe environment.' — This is the key opening sentence of the Animal Management Department!"
+  },
+  {
+    q: "Build the sentence: Protein is for growth. Vitamins are for immunity. (connect with 'while')",
+    hint: "💪 Protein / is / for / growth / while / vitamins / are / for / immunity",
+    words: ["Protein", "is", "for", "growth", "while", "vitamins", "are", "for", "immunity", "."],
+    correct: ["Protein", "is", "for", "growth", "while", "vitamins", "are", "for", "immunity", "."],
+    explain: "✅ 'Protein is for growth while vitamins are for immunity.' — Great use of 'while' to connect two ideas!"
+  },
+  {
+    q: "Arrange to make the profit formula sentence:",
+    hint: "💰 Profit = Revenue – Cost",
+    words: ["Profit", "equals", "revenue", "minus", "cost", "."],
+    correct: ["Profit", "equals", "revenue", "minus", "cost", "."],
+    explain: "✅ 'Profit equals revenue minus cost.' — The most important formula: Profit = Revenue – Cost!"
+  },
+  {
+    q: "Build this conditional sentence: 'If animals are unhealthy, production will decrease.'",
+    hint: "⚠️ Start with 'If'",
+    words: ["If", "animals", "are", "unhealthy", ",", "production", "will", "decrease", "."],
+    correct: ["If", "animals", "are", "unhealthy", ",", "production", "will", "decrease", "."],
+    explain: "✅ Conditional sentence: If + present simple → will + verb. 'If animals are unhealthy, production will decrease.'"
+  },
+  {
+    q: "Arrange: 'Vaccination is necessary for disease prevention.'",
+    hint: "💉 A key health sentence from the presentation.",
+    words: ["Vaccination", "is", "necessary", "for", "disease", "prevention", "."],
+    correct: ["Vaccination", "is", "necessary", "for", "disease", "prevention", "."],
+    explain: "✅ 'Vaccination is necessary for disease prevention.' — Prevention is always better than treatment!"
+  },
+  {
+    q: "Build: 'We are protecting animals with vaccines.' (present continuous)",
+    hint: "🔄 Use: We + are + verb+ing",
+    words: ["We", "are", "protecting", "animals", "with", "vaccines", "."],
+    correct: ["We", "are", "protecting", "animals", "with", "vaccines", "."],
+    explain: "✅ Present continuous: We ARE PROTECTING. This shows action happening right now!"
+  },
+  {
+    q: "Arrange: 'A balanced diet helps animals grow well.'",
+    hint: "⚖️ diet / balanced / A / helps / animals / grow / well",
+    words: ["A", "balanced", "diet", "helps", "animals", "grow", "well", "."],
+    correct: ["A", "balanced", "diet", "helps", "animals", "grow", "well", "."],
+    explain: "✅ 'A balanced diet helps animals grow well.' — Remember: adjective (balanced) comes BEFORE the noun (diet)!"
+  },
+  {
+    q: "Build the conclusion sentence: 'We are ready to contribute to the success of this project.'",
+    hint: "🎯 The final sentence of the Animal Management presentation!",
+    words: ["We", "are", "ready", "to", "contribute", "to", "the", "success", "of", "this", "project", "."],
+    correct: ["We", "are", "ready", "to", "contribute", "to", "the", "success", "of", "this", "project", "."],
+    explain: "✅ Perfect! 'We are ready to contribute to the success of this project.' — A powerful conclusion!"
+  }
+];
+
+// =============================================
+// GAME STATE
+// =============================================
+let state = {
+  currentGame: null,
+  currentQ: 0,
+  score: 0,
+  totalScore: 0,
+  gamesDone: 0,
+  answered: false,
+  chainSelected: [],
+  sentenceSelected: [],
+  sentenceUsed: []
+};
+
+// =============================================
+// NAVIGATION
+// =============================================
+function goHome() {
+  document.querySelectorAll('.game-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('results-screen').style.display = 'none';
+  document.getElementById('main-menu').style.display = 'flex';
+}
+
+function startGame(game) {
+  document.getElementById('main-menu').style.display = 'none';
+  document.getElementById('results-screen').style.display = 'none';
+  state.currentGame = game;
+  state.currentQ = 0;
+  state.score = 0;
+  state.answered = false;
+  document.getElementById('game-' + game).classList.add('active');
+  loadQuestion(game, 0);
+}
+
+function retryGame() {
+  document.getElementById('results-screen').style.display = 'none';
+  startGame(state.currentGame);
+}
+
+// =============================================
+// LOAD QUESTION
+// =============================================
+function loadQuestion(game, idx) {
+  state.answered = false;
+  if (game === 'vocab') loadVocab(idx);
+  else if (game === 'fill') loadFill(idx);
+  else if (game === 'chain') loadChain(idx);
+  else if (game === 'math') loadMath(idx);
+  else if (game === 'sentence') loadSentence(idx);
+}
+
+function nextQuestion(game) {
+  const totals = { vocab: 10, fill: 8, chain: 5, math: 8, sentence: 8 };
+  state.currentQ++;
+  if (state.currentQ >= totals[game]) {
+    showResults(game);
+  } else {
+    loadQuestion(game, state.currentQ);
+  }
+}
+
+// =============================================
+// GAME 1: VOCABULARY
+// =============================================
+function loadVocab(idx) {
+  const q = VOCAB_QUESTIONS[idx];
+  const total = VOCAB_QUESTIONS.length;
+  document.getElementById('vocab-q-num').textContent = idx + 1;
+  document.getElementById('vocab-qnum').textContent = `Question ${idx+1} of ${total}`;
+  document.getElementById('vocab-progress').style.width = ((idx+1)/total*100) + '%';
+  document.getElementById('vocab-question').textContent = q.q;
+  document.getElementById('vocab-hint').textContent = q.hint;
+  document.getElementById('vocab-feedback').className = 'feedback';
+  document.getElementById('vocab-next').className = 'next-btn';
+
+  const opts = document.getElementById('vocab-options');
+  opts.innerHTML = '';
+  // Shuffle options
+  const shuffled = q.options.map((o, i) => ({text: o, idx: i}))
+    .sort(() => Math.random() - 0.5);
+  shuffled.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = item.text.replace(' ✅','');
+    btn.onclick = () => answerVocab(item.idx === q.correct, btn, q);
+    opts.appendChild(btn);
+  });
+}
+
+function answerVocab(correct, btn, q) {
+  if (state.answered) return;
+  state.answered = true;
+  const fb = document.getElementById('vocab-feedback');
+  const allBtns = document.querySelectorAll('#vocab-options .option-btn');
+  allBtns.forEach(b => {
+    b.disabled = true;
+    if (b.textContent === q.options[q.correct].replace(' ✅','')) b.classList.add('correct');
+  });
+  if (correct) {
+    btn.classList.add('correct');
+    state.score++;
+    fb.textContent = '✅ ' + q.explain;
+    fb.className = 'feedback correct show';
+  } else {
+    btn.classList.add('wrong');
+    fb.textContent = '❌ ' + q.explain;
+    fb.className = 'feedback wrong show';
+  }
+  document.getElementById('vocab-next').className = 'next-btn show';
+}
+
+// =============================================
+// GAME 2: FILL IN BLANK
+// =============================================
+function loadFill(idx) {
+  const q = FILL_QUESTIONS[idx];
+  const total = FILL_QUESTIONS.length;
+  document.getElementById('fill-q-num').textContent = idx + 1;
+  document.getElementById('fill-qnum').textContent = `Question ${idx+1} of ${total}`;
+  document.getElementById('fill-progress').style.width = ((idx+1)/total*100) + '%';
+
+  const sentence = q.sentence.replace('_____', '<span style="background:#fff3cd;padding:2px 8px;border-radius:6px;font-weight:bold">_____</span>');
+  document.getElementById('fill-question').innerHTML = sentence + '<br><small style="color:#888;margin-top:6px;display:block">Hint: ' + q.hint + '</small>';
+
+  const input = document.getElementById('fill-input');
+  input.value = '';
+  input.className = 'fill-input';
+  input.disabled = false;
+  input.focus();
+  document.getElementById('fill-feedback').className = 'feedback';
+  document.getElementById('fill-next').className = 'next-btn';
+  state.answered = false;
+}
+
+function checkFill() {
+  if (state.answered) return;
+  const q = FILL_QUESTIONS[state.currentQ];
+  const input = document.getElementById('fill-input');
+  const val = input.value.trim().toLowerCase();
+  const fb = document.getElementById('fill-feedback');
+  state.answered = true;
+  input.disabled = true;
+
+  if (val === q.answer.toLowerCase()) {
+    input.className = 'fill-input correct';
+    state.score++;
+    fb.textContent = '✅ ' + q.explain;
+    fb.className = 'feedback correct show';
+  } else {
+    input.className = 'fill-input wrong';
+    fb.textContent = `❌ The correct answer is "${q.answer}". ${q.explain}`;
+    fb.className = 'feedback wrong show';
+  }
+  document.getElementById('fill-next').className = 'next-btn show';
+}
+
+// =============================================
+// GAME 3: FOOD CHAIN
+// =============================================
+function loadChain(idx) {
+  const q = CHAIN_QUESTIONS[idx];
+  const total = CHAIN_QUESTIONS.length;
+  document.getElementById('chain-q-num').textContent = idx + 1;
+  document.getElementById('chain-qnum').textContent = `Round ${idx+1} of ${total}`;
+  document.getElementById('chain-progress').style.width = ((idx+1)/total*100) + '%';
+  document.getElementById('chain-question').textContent = q.q;
+  document.getElementById('chain-feedback').className = 'feedback';
+  document.getElementById('chain-next').className = 'next-btn';
+  state.chainSelected = [];
+
+  const bank = document.getElementById('chain-word-bank');
+  bank.innerHTML = '';
+  const shuffled = [...q.items].sort(() => Math.random() - 0.5);
+  shuffled.forEach(item => {
+    const chip = document.createElement('div');
+    chip.className = 'word-chip';
+    chip.textContent = item;
+    chip.id = 'chain-chip-' + item.replace(/\s/g,'_');
+    chip.onclick = () => selectChainItem(item, chip);
+    bank.appendChild(chip);
+  });
+  renderChainAnswer();
+  state.answered = false;
+}
+
+function selectChainItem(item, chip) {
+  if (state.answered) return;
+  if (chip.classList.contains('used')) return;
+  chip.classList.add('used');
+  state.chainSelected.push(item);
+  renderChainAnswer();
+}
+
+function renderChainAnswer() {
+  const area = document.getElementById('chain-answer-area');
+  area.innerHTML = '';
+  state.chainSelected.forEach((item, i) => {
+    if (i > 0) {
+      const arrow = document.createElement('span');
+      arrow.className = 'arrow-sep';
+      arrow.textContent = ' → ';
+      area.appendChild(arrow);
+    }
+    const placed = document.createElement('span');
+    placed.className = 'placed-word';
+    placed.textContent = item;
+    area.appendChild(placed);
+  });
+}
+
+function clearChain() {
+  state.chainSelected = [];
+  document.querySelectorAll('#chain-word-bank .word-chip').forEach(c => c.classList.remove('used'));
+  renderChainAnswer();
+}
+
+function checkChain() {
+  if (state.answered) return;
+  const q = CHAIN_QUESTIONS[state.currentQ];
+  const fb = document.getElementById('chain-feedback');
+  state.answered = true;
+
+  const isCorrect = JSON.stringify(state.chainSelected) === JSON.stringify(q.correct);
+  if (isCorrect) {
+    state.score++;
+    fb.textContent = '✅ ' + q.explain;
+    fb.className = 'feedback correct show';
+  } else {
+    fb.textContent = `❌ Correct order: ${q.correct.join(' → ')}. ${q.explain}`;
+    fb.className = 'feedback wrong show';
+  }
+  document.getElementById('chain-next').className = 'next-btn show';
+}
+
+// =============================================
+// GAME 4: MATH
+// =============================================
+function loadMath(idx) {
+  const q = MATH_QUESTIONS[idx];
+  const total = MATH_QUESTIONS.length;
+  document.getElementById('math-q-num').textContent = idx + 1;
+  document.getElementById('math-qnum').textContent = `Question ${idx+1} of ${total}`;
+  document.getElementById('math-progress').style.width = ((idx+1)/total*100) + '%';
+  document.getElementById('math-story').innerHTML = q.story;
+  document.getElementById('math-question').textContent = q.q;
+  document.getElementById('math-feedback').className = 'feedback';
+  document.getElementById('math-next').className = 'next-btn';
+
+  const opts = document.getElementById('math-options');
+  opts.innerHTML = '';
+  const shuffled = q.options.map((o, i) => ({text: o, idx: i}))
+    .sort(() => Math.random() - 0.5);
+  shuffled.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = item.text.replace(' ✅','');
+    btn.onclick = () => answerMath(item.idx === q.correct, btn, q);
+    opts.appendChild(btn);
+  });
+  state.answered = false;
+}
+
+function answerMath(correct, btn, q) {
+  if (state.answered) return;
+  state.answered = true;
+  const fb = document.getElementById('math-feedback');
+  const allBtns = document.querySelectorAll('#math-options .option-btn');
+  allBtns.forEach(b => {
+    b.disabled = true;
+    if (b.textContent === q.options[q.correct].replace(' ✅','')) b.classList.add('correct');
+  });
+  if (correct) {
+    btn.classList.add('correct');
+    state.score++;
+    fb.textContent = '✅ ' + q.explain;
+    fb.className = 'feedback correct show';
+  } else {
+    btn.classList.add('wrong');
+    fb.textContent = '❌ ' + q.explain;
+    fb.className = 'feedback wrong show';
+  }
+  document.getElementById('math-next').className = 'next-btn show';
+}
+
+// =============================================
+// GAME 5: SENTENCE BUILDER
+// =============================================
+function loadSentence(idx) {
+  const q = SENTENCE_QUESTIONS[idx];
+  const total = SENTENCE_QUESTIONS.length;
+  document.getElementById('sentence-q-num').textContent = idx + 1;
+  document.getElementById('sentence-qnum').textContent = `Question ${idx+1} of ${total}`;
+  document.getElementById('sentence-progress').style.width = ((idx+1)/total*100) + '%';
+  document.getElementById('sentence-question').textContent = q.q;
+  document.getElementById('sentence-hint').textContent = '💡 ' + q.hint;
+  document.getElementById('sentence-feedback').className = 'feedback';
+  document.getElementById('sentence-next').className = 'next-btn';
+  state.sentenceSelected = [];
+  state.sentenceUsed = new Array(q.words.length).fill(false);
+
+  const bank = document.getElementById('sentence-word-bank');
+  bank.innerHTML = '';
+  const shuffled = q.words.map((w, i) => ({word: w, origIdx: i}))
+    .sort(() => Math.random() - 0.5);
+  shuffled.forEach(item => {
+    const chip = document.createElement('div');
+    chip.className = 'word-chip';
+    chip.textContent = item.word;
+    chip.dataset.origIdx = item.origIdx;
+    chip.onclick = () => selectWord(item.origIdx, chip);
+    bank.appendChild(chip);
+  });
+  renderSentenceBuilder();
+  state.answered = false;
+}
+
+function selectWord(origIdx, chip) {
+  if (state.answered) return;
+  if (chip.classList.contains('used')) return;
+  chip.classList.add('used');
+  state.sentenceSelected.push({origIdx, chip});
+  renderSentenceBuilder();
+}
+
+function renderSentenceBuilder() {
+  const builder = document.getElementById('sentence-builder');
+  builder.innerHTML = '';
+  const q = SENTENCE_QUESTIONS[state.currentQ];
+  state.sentenceSelected.forEach((item, i) => {
+    const placed = document.createElement('span');
+    placed.className = 'placed-word';
+    placed.textContent = q.words[item.origIdx];
+    placed.onclick = () => removeWord(i);
+    builder.appendChild(placed);
+    if (i < state.sentenceSelected.length - 1) {
+      const sp = document.createTextNode(' ');
+      builder.appendChild(sp);
+    }
+  });
+}
+
+function removeWord(i) {
+  if (state.answered) return;
+  const removed = state.sentenceSelected.splice(i, 1)[0];
+  removed.chip.classList.remove('used');
+  renderSentenceBuilder();
+}
+
+function clearSentence() {
+  state.sentenceSelected.forEach(item => item.chip.classList.remove('used'));
+  state.sentenceSelected = [];
+  renderSentenceBuilder();
+}
+
+function checkSentence() {
+  if (state.answered) return;
+  const q = SENTENCE_QUESTIONS[state.currentQ];
+  const fb = document.getElementById('sentence-feedback');
+  state.answered = true;
+
+  const built = state.sentenceSelected.map(item => q.words[item.origIdx]);
+  const isCorrect = JSON.stringify(built) === JSON.stringify(q.correct);
+  if (isCorrect) {
+    state.score++;
+    fb.textContent = q.explain;
+    fb.className = 'feedback correct show';
+  } else {
+    fb.textContent = `❌ Correct: "${q.correct.join(' ')}" ${q.explain}`;
+    fb.className = 'feedback wrong show';
+  }
+  document.getElementById('sentence-next').className = 'next-btn show';
+}
+
+// =============================================
+// RESULTS
+// =============================================
+function showResults(game) {
+  const totals = { vocab: 10, fill: 8, chain: 5, math: 8, sentence: 8 };
+  const total = totals[game];
+  const score = state.score;
+  const pct = score / total;
+
+  document.getElementById('game-' + game).classList.remove('active');
+  const rs = document.getElementById('results-screen');
+  rs.style.display = 'block';
+
+  state.totalScore += score * 10;
+  state.gamesDone++;
+  document.getElementById('total-score').textContent = state.totalScore;
+  document.getElementById('games-done').textContent = state.gamesDone;
+
+  document.getElementById('results-score').textContent = score + '/' + total;
+
+  let trophy, title, msg;
+  if (pct >= 0.9) {
+    trophy = '🏆'; title = 'Outstanding!';
+    msg = 'Excellent work! You truly understand the Animal Management Department. You\'re ready to give the presentation!';
+  } else if (pct >= 0.7) {
+    trophy = '🥇'; title = 'Great Job!';
+    msg = 'Well done! You have a good understanding. Review the few you missed and you\'ll be perfect!';
+  } else if (pct >= 0.5) {
+    trophy = '🥈'; title = 'Good Try!';
+    msg = 'Nice effort! Read through the Animal Management presentation again and try once more.';
+  } else {
+    trophy = '🌱'; title = 'Keep Growing!';
+    msg = 'Keep practicing! Review the vocabulary and try again. Every expert was once a beginner!';
+  }
+
+  document.getElementById('results-trophy').textContent = trophy;
+  document.getElementById('results-title').textContent = title;
+  document.getElementById('results-msg').textContent = msg;
+}
+</script>
+</body>
+</html>
